@@ -1,6 +1,6 @@
-import { Fragment } from 'react'
+import React, { Fragment, useEffect, useState } from 'react'
 import { Disclosure, Menu, Transition } from '@headlessui/react'
-import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { Bars3Icon, BellIcon, XMarkIcon, ShoppingBagIcon } from '@heroicons/react/24/outline'
 import './../../index.css';
 import AllProducts from '../AllProducts/AllProducts';
 
@@ -16,6 +16,9 @@ function classNames(...classes) {
 }
 
 export default function TailwindNav() {
+
+  const [cartLength, setCartLength] = useState(0)
+  
   return (
     <>
     <Disclosure as="nav" className="bg-green-600">
@@ -39,7 +42,7 @@ export default function TailwindNav() {
                 <div className="flex flex-shrink-0 items-center">
                   <img
                     className="h-8 w-auto"
-                    src="https://img.icons8.com/ios/50/shop--v1.png" alt="shop--v1"
+                    src={require("../../assets/store.png")} alt="shop--v1"
                   />
                 </div>
                 <div className="hidden sm:ml-6 sm:block">
@@ -63,13 +66,12 @@ export default function TailwindNav() {
               <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
                 <button
                   type="button"
-                  className="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
+                  className="relative rounded-full bg-transparent-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
                 >
                   <span className="absolute -inset-1.5" />
                   <span className="sr-only">View notifications</span>
-                  <BellIcon className="h-6 w-6" aria-hidden="true" />
+                  <BellIcon className="h-6 w-6 text-white" aria-hidden="true" />
                 </button>
-
                 {/* Profile dropdown */}
                 <Menu as="div" className="relative ml-3">
                   <div>
@@ -126,6 +128,11 @@ export default function TailwindNav() {
                     </Menu.Items>
                   </Transition>
                 </Menu>
+                <ShoppingBagIcon
+                      className="h-6 w-6 mx-2 flex-shrink-0  text-white text-gray-400 group-hover:text-gray-500"
+                      aria-hidden="true"
+                />
+                 <span className="ml-2 color-white bg-transparent-800 text-white text-sm font-medium text-white-700 group-hover:text-white-800">{cartLength}</span>
               </div>
             </div>
           </div>
@@ -151,7 +158,7 @@ export default function TailwindNav() {
         </>
       )}
     </Disclosure>
-    <AllProducts/>
+    <AllProducts setCartLength={setCartLength}/>
     </>
   )
 }

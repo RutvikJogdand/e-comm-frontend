@@ -19,7 +19,7 @@ const countReducer = (state, action) => {
     }
 };
 
-export default function AllProducts() {
+export default function AllProducts({setCartLength}) {
     const [productsData, setProductsData] = useState([]);
     const initialCounters = JSON.parse(localStorage.getItem('productCounts')) || {};
     const [counters, dispatch] = useReducer(countReducer, initialCounters);
@@ -39,6 +39,7 @@ export default function AllProducts() {
             }, {});
 
             setProductsData(updatedData);
+            setCartLength(savedProducts?.length)
             dispatch({ type: 'INITIALIZE', payload: initialCounters });
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -64,6 +65,7 @@ export default function AllProducts() {
         }
 
         localStorage.setItem('selectedProducts', JSON.stringify(selectedProducts));
+        setCartLength(selectedProducts.length)
   
     };
     
