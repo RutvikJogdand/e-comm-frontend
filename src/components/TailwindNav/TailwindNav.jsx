@@ -3,6 +3,7 @@ import { Disclosure, Menu, Transition } from '@headlessui/react'
 import { Bars3Icon, BellIcon, XMarkIcon, ShoppingBagIcon } from '@heroicons/react/24/outline'
 import './../../index.css';
 import AllProducts from '../AllProducts/AllProducts';
+import Cart from '../Cart/Cart';
 
 const navigation = [
   { name: 'Grocerify', href: '#', current: true },
@@ -17,11 +18,14 @@ function classNames(...classes) {
 
 export default function TailwindNav() {
 
-  const [cartLength, setCartLength] = useState(0)
-  
+  const [cartLength, setCartLength] = useState(0);
+  const [cartOpen, setCartOpen] = useState(true);
+  const handleCartView = () => {
+    setCartOpen(prevState => !prevState)
+  }
   return (
     <>
-    <Disclosure as="nav" className="bg-green-600">
+    <Disclosure as="nav" className=" sticky top-0 z-50 bg-green-600">
       {({ open }) => (
         <>
           <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
@@ -131,6 +135,7 @@ export default function TailwindNav() {
                 <ShoppingBagIcon
                       className="h-6 w-6 mx-2 flex-shrink-0  text-white text-gray-400 group-hover:text-gray-500"
                       aria-hidden="true"
+                      onClick={handleCartView}
                 />
                  <span className="ml-2 color-white bg-transparent-800 text-white text-sm font-medium text-white-700 group-hover:text-white-800">{cartLength}</span>
               </div>
@@ -159,6 +164,7 @@ export default function TailwindNav() {
       )}
     </Disclosure>
     <AllProducts setCartLength={setCartLength}/>
+    <Cart cartState={cartOpen} toggleCartState={setCartOpen} />
     </>
   )
 }

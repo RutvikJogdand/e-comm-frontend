@@ -7,12 +7,15 @@ const ActionTypes = {
   };
 
 const countReducer = (state, action) => {
+    // state: Represents the current state of the counter, which is an object where each key is a product_id and its value is the count.
     switch (action.type) {
         case ActionTypes.INCREMENT:
             return { ...state, [action.payload]: (state[action.payload] || 0) + 1 };
         case ActionTypes.DECREMENT:
+            // If the action is DECREMENT, decrease the count, ensuring it doesn't go below 0.
             return { ...state, [action.payload]: (state[action.payload] || 0) > 0 ? state[action.payload] - 1 : 0 };
         case 'INITIALIZE':
+            // INITIALIZE sets the state to the payload, used for setting initial values from local storage.
             return action.payload;
         default:
             return state;
@@ -21,7 +24,7 @@ const countReducer = (state, action) => {
 
 export default function AllProducts({setCartLength}) {
     const [productsData, setProductsData] = useState([]);
-    const initialCounters = JSON.parse(localStorage.getItem('productCounts')) || {};
+    const initialCounters = JSON.parse(localStorage.getItem('selectedProducts')) || {};
     const [counters, dispatch] = useReducer(countReducer, initialCounters);
   
     const fetchData = useCallback(async () => {

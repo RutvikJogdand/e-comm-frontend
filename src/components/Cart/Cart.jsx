@@ -27,12 +27,13 @@ const products = [
   // More products...
 ]
 
-export default function Example() {
+export default function Cart(props) {
   const [open, setOpen] = useState(true)
 
+  console.log('props in cart', props.cart)
   return (
-    <Transition.Root show={open} as={Fragment}>
-      <Dialog as="div" className="relative z-10" onClose={setOpen}>
+    <Transition.Root show={props.cartState} as={Fragment}>
+      <Dialog as="div" className="relative z-10" onClose={props.toggleCartState}>
         <Transition.Child
           as={Fragment}
           enter="ease-in-out duration-500"
@@ -66,7 +67,7 @@ export default function Example() {
                           <button
                             type="button"
                             className="relative -m-2 p-2 text-gray-400 hover:text-gray-500"
-                            onClick={() => setOpen(false)}
+                            onClick={() => props.toggleCartState(false)}
                           >
                             <span className="absolute -inset-0.5" />
                             <span className="sr-only">Close panel</span>
@@ -138,7 +139,7 @@ export default function Example() {
                           <button
                             type="button"
                             className="font-medium text-indigo-600 hover:text-indigo-500"
-                            onClick={() => setOpen(false)}
+                            onClick={() => props.toggleCartState(false)}
                           >
                             Continue Shopping
                             <span aria-hidden="true"> &rarr;</span>
