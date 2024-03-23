@@ -1,6 +1,7 @@
-import React, { Fragment, useEffect, useState } from 'react'
+import React, { Fragment, useEffect, useState, useCallback, useReducer } from 'react'
 import { Disclosure, Menu, Transition } from '@headlessui/react'
 import { Bars3Icon, BellIcon, XMarkIcon, ShoppingBagIcon } from '@heroicons/react/24/outline'
+import axios from 'axios';
 import './../../index.css';
 import AllProducts from '../AllProducts/AllProducts';
 import Cart from '../Cart/Cart';
@@ -16,10 +17,129 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
 }
 
+const ActionTypes = {
+  INCREMENT: 'INCREMENT',
+  DECREMENT: 'DECREMENT',
+  SETZERO: 'SETZERO'
+};
+
+const countReducer = (state, action) => {
+  // state: Represents the current state of the counter, which is an object where each key is a product_id and its value is the count.
+  switch (action.type) {
+      case ActionTypes.INCREMENT:
+          return { ...state, [action.payload]: (state[action.payload] || 0) + 1 };
+      case ActionTypes.DECREMENT:
+          // If the action is DECREMENT, decrease the count, ensuring it doesn't go below 0.
+          return { ...state, [action.payload]: (state[action.payload] || 0) > 0 ? state[action.payload] - 1 : 0 };
+      case ActionTypes.SETZERO:
+          return {...state, [action.payload]: 0};
+      case 'INITIALIZE':
+          // INITIALIZE sets the state to the payload, used for setting initial values from local storage.
+          return action.payload;
+      default:
+          return state;
+  }
+};
+
 export default function TailwindNav() {
 
   const [cartLength, setCartLength] = useState(0);
-  const [cartOpen, setCartOpen] = useState(true);
+  const [cartOpen, setCartOpen] = useState(false);
+
+  const [productsData, setProductsData] = useState([]);
+  const initialCounters = JSON.parse(localStorage.getItem('selectedProducts')) || {};
+  const [counters, dispatch] = useReducer(countReducer, initialCounters);
+
+  const fetchData = useCallback(async () => {
+      try {
+          const response = await axios.get('http://localhost:5000/api/products/get-products');
+          const savedProducts = JSON.parse(localStorage.getItem('selectedProducts')) || [];
+          const updatedData = response.data.map(product => ({
+              ...product,
+              quantity: savedProducts.find(p => p.product_id === product.product_id)?.quantity || 0
+          }));
+
+          const initialCounters = savedProducts.reduce((acc, product) => {
+              acc[product.product_id] = product.quantity;
+              return acc;
+          }, {});
+
+          setProductsData(updatedData);
+          setCartLength(savedProducts?.length)
+          dispatch({ type: 'INITIALIZE', payload: initialCounters });
+      } catch (error) {
+          console.error('Error fetching data:', error);
+      }
+  }, []); // Dependencies array is empty, meaning this function is created once
+
+  useEffect(() => {
+      fetchData()
+  },[fetchData])
+
+  const updateLocalStorage = (updatedProduct) => {
+      let selectedProducts = JSON.parse(localStorage.getItem('selectedProducts')) || [];
+      const existingProductIndex = selectedProducts.findIndex(p => p.product_id === updatedProduct.product_id);
+
+      if (existingProductIndex !== -1) {
+      if (updatedProduct.quantity > 0) {
+          selectedProducts[existingProductIndex] = updatedProduct;
+      } else {
+          selectedProducts.splice(existingProductIndex, 1);
+      }
+      } else if (updatedProduct.quantity > 0) {
+      selectedProducts.push(updatedProduct);
+      }
+
+      localStorage.setItem('selectedProducts', JSON.stringify(selectedProducts));
+      setCartLength(selectedProducts.length)
+
+  };
+  
+  const adjustCount = (productId, numChange) => {
+      const newCount = (counters[productId] || 0) + numChange;
+      dispatch({ type: numChange > 0 ? ActionTypes.INCREMENT : ActionTypes.DECREMENT  , payload: productId });
+  
+      const newProductsData = productsData.map(product => {
+          if (product.product_id === productId) {
+              const updatedProduct = { ...product, quantity: newCount >= 0 ? newCount : 0 };
+              updateLocalStorage(updatedProduct);
+              return updatedProduct;
+          }
+          return product;
+      });
+      setProductsData(newProductsData);
+  };
+  
+  const increment = productId => adjustCount(productId, 1);
+
+  const decrement = productId => adjustCount(productId, -1);
+
+  const remove = productId => {
+    // Dispatch SETZERO action to update the counter state
+    dispatch({ type: ActionTypes.SETZERO, payload: productId });
+
+    // Update the productsData state to reflect the removal (count set to 0)
+    const newProductsData = productsData.map(product => {
+        if (product.product_id === productId) {
+            // Here you update the product quantity to 0
+            return { ...product, quantity: 0 };
+        }
+        return product;
+    });
+    setProductsData(newProductsData);
+
+    let selectedProducts = JSON.parse(localStorage.getItem('selectedProducts')) || [];
+    const productIndex = selectedProducts.findIndex(p => p.product_id === productId);
+
+    if (productIndex !== -1) {
+        selectedProducts.splice(productIndex, 1);
+    }
+
+    localStorage.setItem('selectedProducts', JSON.stringify(selectedProducts));
+    setCartLength(selectedProducts.length);
+};
+
+
   const handleCartView = () => {
     setCartOpen(prevState => !prevState)
   }
@@ -163,8 +283,8 @@ export default function TailwindNav() {
         </>
       )}
     </Disclosure>
-    <AllProducts setCartLength={setCartLength}/>
-    <Cart cartState={cartOpen} toggleCartState={setCartOpen} />
+    <AllProducts  increment={increment} decrement={decrement} counters={counters} productsData={productsData} setCartLength={setCartLength}/>
+    <Cart increment={increment} decrement={decrement} remove={remove} counters={counters} productsData={productsData} cartState={cartOpen} toggleCartState={setCartOpen} />
     </>
   )
 }
