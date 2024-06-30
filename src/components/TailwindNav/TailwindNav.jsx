@@ -196,7 +196,7 @@ export default function TailwindNav() {
                 >
                   <span className="absolute -inset-1.5" />
                   <span className="sr-only">View notifications</span>
-                  <BellIcon className="h-6 w-6 text-white" aria-hidden="true" />
+                  {/* <BellIcon className="h-6 w-6 text-white" aria-hidden="true" /> */}
                 </button>
                 {/* Profile dropdown */}
                 <Menu as="div" className="relative ml-3">
