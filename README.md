@@ -2,6 +2,8 @@
 
 An e-commerce frontend application built with modern web technologies to provide a seamless shopping experience.
 
+![Desktop View](https://github.com/RutvikJogdand/e-comm-frontend/blob/main/src/assets/Desktop.png?raw=true)
+
 ## Table of Contents
 
 - [Description](#description)
