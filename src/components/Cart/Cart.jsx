@@ -12,9 +12,7 @@ export default function Cart(props) {
   }, [props.productsData]);
 
   const getSubTotal = () => {
-    console.log('productsArr ===>', productsArr)
     let total = productsArr.reduce((accumulator, product) =>  (product.quantity*product.price) + accumulator,0)
-    console.log('total ===>',total)
     return (total/100)
   }
 

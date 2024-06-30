@@ -7,7 +7,6 @@ const initialState = {
 };
   
 const productsReducer = (state = initialState, action) => {
-  console.log('action ===', action)
   switch (action.type) {
     case 'SET_PRODUCTS':
       return { ...state, productsArr: action.payload, loading: false };
