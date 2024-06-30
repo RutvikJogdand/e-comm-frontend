@@ -1,10 +1,12 @@
 import React, { Fragment, useEffect, useState, useCallback, useReducer } from 'react'
 import { Disclosure, Menu, Transition } from '@headlessui/react'
+import { useSelector, useDispatch } from 'react-redux';
 import { Bars3Icon, BellIcon, XMarkIcon, ShoppingBagIcon } from '@heroicons/react/24/outline'
 import axios from 'axios';
 import './../../index.css';
 import AllProducts from '../AllProducts/AllProducts';
 import Cart from '../Cart/Cart';
+import { setProducts } from '../../redux/actions';
 
 const navigation = [
   { name: 'Grocerify', href: '#', current: true },
@@ -45,8 +47,8 @@ export default function TailwindNav() {
 
   const [cartLength, setCartLength] = useState(0);
   const [cartOpen, setCartOpen] = useState(false);
-
-  const [productsData, setProductsData] = useState([]);
+  const productsData = useSelector((state) => state.productsState.productsArr);
+  const dispatchAction = useDispatch()
   const initialCounters = JSON.parse(localStorage.getItem('selectedProducts')) || {};
   const [counters, dispatch] = useReducer(countReducer, initialCounters);
 
@@ -64,7 +66,7 @@ export default function TailwindNav() {
               return acc;
           }, {});
 
-          setProductsData(updatedData);
+          dispatchAction(setProducts(updatedData));
           setCartLength(savedProducts?.length)
           dispatch({ type: 'INITIALIZE', payload: initialCounters });
       } catch (error) {
@@ -107,7 +109,7 @@ export default function TailwindNav() {
           }
           return product;
       });
-      setProductsData(newProductsData);
+      dispatchAction(setProducts(newProductsData));
   };
   
   const increment = productId => adjustCount(productId, 1);
@@ -126,7 +128,7 @@ export default function TailwindNav() {
         }
         return product;
     });
-    setProductsData(newProductsData);
+    dispatchAction(setProducts(newProductsData));
 
     let selectedProducts = JSON.parse(localStorage.getItem('selectedProducts')) || [];
     const productIndex = selectedProducts.findIndex(p => p.product_id === productId);
